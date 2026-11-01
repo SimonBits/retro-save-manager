@@ -1,5 +1,10 @@
 # Retro Save Manager (RSM) for Steam Deck
 
+RSM **v0.1.1** · Syncthing **v2.1.7**
+
+Release platforms: Steam Deck AMD64 and [Armada OS ARM64](armada/README.md).
+H700 is not included in this release.
+
 **English | [简体中文](README-CN.md)**
 
 Retro Save Manager (RSM) is a lightweight save synchronization solution
@@ -26,7 +31,9 @@ time you use your Steam Deck.
 
 ## Supported Platform
 
-Validated in this release:
+The original v0.1.0 implementation was validated on the following platform.
+The user has confirmed hardware validation of this v0.1.1 package with the
+unchanged v2.1.7 payload:
 
 -   Steam Deck
 -   SteamOS
@@ -34,10 +41,10 @@ Validated in this release:
 
 Bundled Syncthing version:
 
--   Syncthing v2.1.5
+-   Syncthing v2.1.7
 
-Other Linux handhelds may work, but they have not been validated in this
-release.
+Armada OS ARM64 is supported by the separate Armada package described in
+[its README](armada/README.md). Other platforms are outside this release scope.
 
 ## Installation
 
@@ -233,6 +240,97 @@ For Simplified Chinese uninstaller output, run
 
 **Warning: This operation permanently deletes the RSM Syncthing
 configuration and cannot be undone.**
+
+## Offline upgrade (`upgrade.sh`)
+
+RSM version: **v0.1.1**, bundling official Syncthing **v2.1.7**. Steam Deck AMD64 and
+Armada OS ARM64 have both passed user hardware validation. The historical
+v0.1.0 Release remains unchanged.
+
+| Task | Command | Effect |
+| --- | --- | --- |
+| First installation | `./install.sh` | Installs and enables the user service; refuses an existing installation |
+| Offline upgrade | `./upgrade.sh` | Replaces the installed program and notices from this package |
+| Normal uninstall | `./uninstall.sh` | Removes the service/program; preserves configuration and identity |
+
+All three accept `--cn`. **Never use `--purge` to upgrade.** It deletes identity
+and configuration. Upgrade does not need uninstall/reinstall.
+
+Choose the package for your platform: `RSM-SteamDeck-v0.1.1.zip` for AMD64 or
+`RSM-ArmadaOS-v0.1.1.zip` for ARM64. Check its supplied ZIP SHA-256, then extract
+to a separate directory, not the installed RSM directory. Close games and let
+synchronization finish. Run as the original installing user, without sudo:
+
+```bash
+./upgrade.sh
+```
+
+The upgrader verifies package checksums, architecture, existing installation,
+service command and stable Syncthing versions. It rejects downgrades, a different
+binary with the same version, nonstandard/symlinked installations and unstable
+service states. Concurrent upgrades are locked. Identical program/notices are a
+no-op; no service restart occurs. The scripts do not download anything.
+
+When already up to date, the script prints:
+
+```text
+[ OK ] Already up to date. No upgrade needed.
+```
+
+When no RSM installation directory, user unit or enablement link exists, it
+prints the following and exits successfully (code 0), without service changes:
+
+```text
+[ INFO ] RSM is not installed. Run install.sh first.
+[ INFO ] No installation found. No upgrade needed.
+```
+
+Incomplete installations still fail with a nonzero exit code. This includes
+retained configuration after normal uninstall, an empty installation directory,
+missing required files or dangling unit/enablement symlinks. Use `install.sh`
+for a normal reinstall with retained configuration; do not use `--purge`.
+
+It stops the user service and requires it to be inactive with no Syncthing
+processes remaining for that user. Other instances are never killed: stop them
+separately before retrying. It backs up the old binary, notices and unit under
+`~/.local/share/retro-save-manager/upgrade-backup-*`, then stages files on the
+same filesystem and renames them into place. The service unit and enablement
+are not changed. Configuration, database, Device ID and synchronized folders are
+not copied, deleted, reset or edited by the upgrader. Backups here are **program
+backups, not database/save backups**. Normal Syncthing startup/synchronization
+can still write configuration, migrate its database or synchronize files.
+
+If the service was running, it is restarted and checked for up to 30 seconds:
+active service, matching running executable/version, and a TCP 8384 listener
+owned by that executable. This does not test HTTP or LAN reachability. If the
+service was stopped, it remains stopped; runtime/Web UI validation is explicitly
+deferred until you start it manually. No enable/disable operation is performed.
+
+Before any attempt to start the new version, failure triggers best-effort
+restoration of the old binary/notices and the prior running state. **After a new
+start attempt, failure never automatically downgrades the binary**: the database
+may already have migrated, even when systemctl reports failure. The upgrader
+tries to stop the service, leaves the new files and program backup in place,
+prints a warning and exits unsuccessfully. Do not manually restore only the old
+binary. Inspect logs and database compatibility first; a full data rollback
+requires your own compatible offline backup. If stopping fails, it reports that
+process shutdown could not be confirmed. Interrupted staging may be retained
+for inspection; SIGKILL/power loss cannot be automatically recovered by a trap.
+
+After upgrading, verify:
+
+```bash
+systemctl --user status rsm-syncthing.service --no-pager
+journalctl --user -u rsm-syncthing.service -b -n 80 --no-pager
+"$HOME/.local/share/retro-save-manager/bin/syncthing" --version
+```
+
+Check Web UI, Device ID and shared folders. For a previously stopped service,
+start it only when you intend to resume synchronization:
+
+```bash
+systemctl --user start rsm-syncthing.service
+```
 
 ## Reinstallation
 

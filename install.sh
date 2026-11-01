@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Retro Save Manager (RSM) - Steam Deck Installer
-# Version: 0.1.0
+# Version: 0.1.1
 # Author: SimonBits
 # YouTube: @SimonBitsDev
 # Bilibili: 大叔怀旧研究所
@@ -23,7 +23,7 @@ elif [ $# -gt 0 ]; then
 fi
 
 RSM_NAME="Retro Save Manager"
-RSM_VERSION="0.1.0"
+RSM_VERSION="0.1.1"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PAYLOAD="$SCRIPT_DIR/payload/syncthing"

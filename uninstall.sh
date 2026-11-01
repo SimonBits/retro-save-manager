@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Retro Save Manager (RSM) - Steam Deck Uninstaller
-# Version: 0.1.0
+# Version: 0.1.1
 # Author: SimonBits
 # YouTube: @SimonBitsDev
 # Bilibili: 大叔怀旧研究所

@@ -1,5 +1,10 @@
 # Retro Save Manager (RSM) Steam Deck 版
 
+RSM **v0.1.1** · Syncthing **v2.1.7**
+
+本次发布平台：Steam Deck AMD64 和 [Armada OS ARM64](armada/README-CN.md)。
+H700 不属于本次发布范围。
+
 **[English](README.md) | 简体中文**
 
 Retro Save Manager（RSM）是一套面向 Steam Deck
@@ -25,7 +30,8 @@ RSM 使用 [Syncthing](https://syncthing.net/) 在 Steam Deck
 
 ## 支持平台
 
-当前版本已验证：
+原始 v0.1.0 实现已在以下平台验证；用户已确认本次 v0.1.1 安装包通过真机验证，
+沿用 v2.1.7 payload：
 
 -   Steam Deck
 -   SteamOS
@@ -33,9 +39,10 @@ RSM 使用 [Syncthing](https://syncthing.net/) 在 Steam Deck
 
 内置 Syncthing 版本：
 
--   Syncthing v2.1.5
+-   Syncthing v2.1.7
 
-其他 Linux 掌机理论上可能可以运行，但当前版本尚未进行验证。
+Armada OS ARM64 请使用独立安装包，参阅 [Armada 中文说明](armada/README-CN.md)。
+其他平台不在本次发布范围内。
 
 ## 安装
 
@@ -221,6 +228,87 @@ chmod +x uninstall.sh
 ```
 
 **警告：此操作会永久删除 RSM 使用的 Syncthing 配置，无法撤销。**
+
+## 离线升级（`upgrade.sh`）
+
+RSM 版本为 **v0.1.1**，内置官方 Syncthing **v2.1.7**。
+用户已确认 Steam Deck AMD64 和 Armada OS ARM64 均通过真机验证。
+历史 v0.1.0 Release 保持不变。
+
+| 操作 | 命令 | 行为 |
+| --- | --- | --- |
+| 首次安装 | `./install.sh --cn` | 安装并启用用户服务；已有安装时拒绝执行 |
+| 离线升级 | `./upgrade.sh --cn` | 使用本包替换已安装程序及声明文件 |
+| 普通卸载 | `./uninstall.sh --cn` | 删除服务和程序，保留配置及身份 |
+
+不带 `--cn` 时输出英文。**绝不要使用 `--purge` 升级**，它会删除配置和身份。
+升级不需要卸载重装。
+
+AMD64 选择 `RSM-SteamDeck-v0.1.1.zip`，ARM64 选择
+`RSM-ArmadaOS-v0.1.1.zip`。先核对提供的 ZIP SHA-256，解压到独立目录，
+不要覆盖已安装目录。退出游戏并等待同步完成，再以原安装用户执行，勿用 sudo：
+
+```bash
+./upgrade.sh --cn
+```
+
+升级器核验包内校验和、架构、已有安装、服务命令及 Syncthing 稳定版版本号。
+拒绝降级、版本相同但二进制不同、非标准或符号链接形式的安装，以及状态不稳定的服务。
+并发升级会被锁阻止。程序及声明文件完全相同时直接结束，不重启服务。
+脚本不会在线下载任何内容。
+
+已安装目标版本且文件相同时显示：
+
+```text
+[ OK ] 当前已安装最新版本，无需升级。
+```
+
+安装目录、用户服务文件及自启动链接均不存在时，显示以下提示并正常退出
+（退出码 0），不改变服务状态：
+
+```text
+[ INFO ] 未安装 RSM，请先运行 install.sh 完成安装。
+[ INFO ] 未安装，无需升级。
+```
+
+残缺安装仍以非零退出码报错，包括普通卸载后保留的配置、空安装目录、
+必需文件缺失或失效的服务/自启动符号链接。普通卸载后如需重新安装，
+使用 `install.sh` 复用保留的配置，不要使用 `--purge`。
+
+升级前停止用户服务，要求服务为 inactive 且该用户的 Syncthing 进程全部退出。
+不会杀死其他实例；如有其他实例，请自行停止后重试。
+旧程序、声明文件和服务文件备份到
+`~/.local/share/retro-save-manager/upgrade-backup-*`，然后在同一文件系统内
+准备新文件，通过重命名替换，避免直接覆盖运行中的二进制。
+不修改服务文件或自启动设置。升级器不复制、删除、重置或编辑配置、数据库、
+Device ID 和同步目录。这里是**程序文件备份，不是数据库或存档备份**；
+Syncthing 正常启动和同步仍可能写入配置、迁移数据库或同步文件。
+
+原本运行的服务会重新启动，最多检查 30 秒：服务运行、进程对应的程序及版本正确，
+且该程序拥有 TCP 8384 监听。此检查不验证 HTTP 或局域网连通。
+原本停止的服务升级后保持停止，并明确提示运行/Web UI 验证留待手动启动。
+升级器不执行 enable/disable。
+
+尚未尝试启动新版本时失败，会尽可能恢复旧程序和声明文件，并恢复此前的运行状态。
+**一旦尝试启动新版本，失败后不会自动降级二进制**：即使 systemctl 报错，
+数据库也可能已经迁移。升级器会尝试停止服务，保留新文件和程序备份，明确警告并以失败退出。
+不要手动只恢复旧二进制；先检查日志和数据库兼容性，完整数据回退需要你自己的
+兼容离线备份。停止失败时会明确提示无法确认进程退出。
+失败的临时文件可能保留供排查；SIGKILL 或断电无法由退出处理自动恢复。
+
+升级后检查：
+
+```bash
+systemctl --user status rsm-syncthing.service --no-pager
+journalctl --user -u rsm-syncthing.service -b -n 80 --no-pager
+"$HOME/.local/share/retro-save-manager/bin/syncthing" --version
+```
+
+再确认 Web UI、Device ID 和共享文件夹。原本停止的服务仅在需要恢复同步时手动启动：
+
+```bash
+systemctl --user start rsm-syncthing.service
+```
 
 ## 重新安装
 

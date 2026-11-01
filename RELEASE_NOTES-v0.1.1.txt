@@ -1,0 +1,90 @@
+RSM v0.1.1 — Release Notes DRAFT / 发布说明草稿
+
+Status: draft for publication; not publicly released.
+状态：待发布草稿，尚未公开发布。
+
+English
+
+Platforms: Steam Deck (AMD64) and Armada OS (ARM64).
+H700 is not included in this release.
+RSM project version: v0.1.1. Bundled Syncthing: official stable v2.1.7.
+The existing v0.1.0 GitHub Release and all historical packages remain unchanged.
+
+Compared with the original Steam Deck v0.1.0 Release, this release preparation
+includes an Armada ARM64 package, Syncthing v2.1.7 on both platforms, an offline
+upgrade.sh, and Armada installation readiness polling for up to 30 seconds.
+No online updater, download feature or system-level service is added.
+
+Final corrections:
+- An identical installation prints exactly:
+  [ OK ] Already up to date. No upgrade needed.
+- When the RSM installation directory, user unit and enablement link are absent:
+  [ INFO ] RSM is not installed. Run install.sh first.
+  [ INFO ] No installation found. No upgrade needed.
+  Exit status is 0. Incomplete installations still return nonzero.
+- Install/uninstall behavior remains unchanged apart from project version text.
+  Other upgrade behavior is unchanged. Syncthing binaries are byte-identical
+  to the preceding v2.1.7 builds.
+
+First installation: extract the appropriate package and run ./install.sh.
+Existing installation: run ./upgrade.sh from the extracted package as the
+original user without sudo. No uninstall is required; never use --purge to
+upgrade. Configuration, database, Device ID and saves are not reset/deleted by
+the upgrader. A previously stopped service remains stopped. After attempting
+to start the new binary, failures do not trigger a blind binary downgrade.
+Normal removal: ./uninstall.sh preserves configuration and Device ID.
+All three scripts support --cn for Simplified Chinese.
+
+Validation: Bash syntax checks, ShellCheck with no new diagnostics, 40 upgrade
+simulation cases, 44 bilingual absent/incomplete-install cases, six existing
+Armada readiness cases, documentation/scope checks, and archive checksums.
+Original installer ShellCheck findings (SC2034/SC2181) remain unchanged.
+The user has confirmed that both Steam Deck AMD64 and Armada OS ARM64
+v0.1.1 passed hardware validation. Armada installation, startup, reboot recovery
+and upgrade were reported working. Separate mode-switch/OS-update testing is
+not claimed. The tested ZIP files are preserved byte-for-byte; any pending-test
+wording inside their packaged READMEs predates this hardware acceptance.
+
+简体中文
+
+支持平台：Steam Deck AMD64、Armada OS ARM64。
+H700 不属于本次发布范围。
+RSM 版本更新为 v0.1.1，Syncthing 继续使用官方稳定版 v2.1.7。
+保留原 v0.1.0 GitHub Release 及全部历史安装包，不覆盖旧版本。
+
+相对原 Steam Deck 正式版，本次发布准备包含 Armada ARM64 安装包、
+两个平台的 Syncthing v2.1.7、独立离线 upgrade.sh，以及 Armada 安装器
+最多 30 秒的就绪轮询。不增加在线更新、下载功能或系统级服务。
+
+最终修正：
+- 文件已与目标版本一致时只显示：
+  [ OK ] 当前已安装最新版本，无需升级。
+- 安装目录、用户服务文件和自启动链接均不存在时显示：
+  [ INFO ] 未安装 RSM，请先运行 install.sh 完成安装。
+  [ INFO ] 未安装，无需升级。
+  正常退出，退出码为 0；残缺安装仍返回非零退出码。
+- 安装和卸载行为仅调整项目版本文字，其他升级行为不变。
+  Syncthing 二进制与上一轮 v2.1.7 安装包逐字节相同。
+
+首次安装：./install.sh --cn
+已有安装离线升级：./upgrade.sh --cn
+普通卸载：./uninstall.sh --cn
+以原安装用户运行，不使用 sudo；升级不需要卸载，不要使用 --purge。
+升级器不重置或删除配置、数据库、Device ID 和存档。原本停止的服务保持停止；
+尝试启动新二进制后若失败，不盲目降级旧程序。
+
+验证：Bash 语法检查、ShellCheck 无新增问题、40 个升级模拟场景、
+44 个中英文未安装/残缺安装场景、6 个已有 Armada 就绪场景，以及文档、
+修改范围、安装包和校验和检查均通过。保留原安装器的 SC2034/SC2181 提示。
+用户已确认 Steam Deck AMD64 和 Armada OS ARM64 v0.1.1 均通过真机验证。
+Armada 安装、启动、重启恢复及升级已反馈正常，不将模式切换或系统更新
+单独写为已验证。两个已验证 ZIP 保持原始字节；包内 README 的待测试文字
+形成于本次真机验收之前，以本发布说明中的验收状态为准。
+
+Assets / 安装包与 SHA-256
+
+RSM-SteamDeck-v0.1.1.zip
+aa0f398d7646de4b69c2a95214db68b0b51f5808506e3b7cd9c9c17c919ef7a2
+
+RSM-ArmadaOS-v0.1.1.zip
+17569557700f2ec268b620cfe894e1aede05fc4d4dedfb26262a28178348ffff
